@@ -11,9 +11,9 @@ class DesktopCleanerInator:
     def __init__(self, root):
         self.root = root
         self.root.title("Desktop Cleaner")
-        self.root.geometry("600x600")
+        self.root.geometry("600x725")
         self.root.configure(bg="#1A1A1D")
-        #self.root.iconbitmap("icon.ico") 
+        #self.root.iconbitmap("icon.ico")
         self.create_widgets()
 
     def create_widgets(self):
@@ -22,29 +22,32 @@ class DesktopCleanerInator:
         self.title_label = tk.Label(self.root, text="Desktop Cleaner", font=("Courier", 20, "bold"), bg="#1A1A1D", fg="#66FF66")
         self.title_label.pack(pady=10)
 
+        self.clean_button = tk.Button(self.root, text="Clean Desktop", command=self.clean_desktop, font=("Courier", 12, "bold"), bg="#333333", fg="#66FF66", activebackground="#444444", activeforeground="#FFFFFF")
+        self.clean_button.pack(pady=20)
+
         self.instructions = tk.Label(self.root, text="Select folders for each category (optional):", font=("Courier", 12), bg="#1A1A1D", fg="#CCCCCC")
         self.instructions.pack(pady=5)
 
         self.categories = ['Images', 'Music', 'Documents', 'Videos', 'Archives', 'Others']
         self.category_paths = {}
 
-        for category in self.categories:
-            frame = tk.Frame(self.root, bg="#1A1A1D")
-            frame.pack(fill=tk.X, padx=10, pady=5)
-
-            label = tk.Label(frame, text=f"{category} folder:", font=("Courier", 12), bg="#1A1A1D", fg="#CCCCCC", width=12, anchor='w')
-            label.grid(row=0, column=0, padx=5)
+        frame = tk.Frame(self.root, bg="#1A1A1D")
+        frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        for idx, category in enumerate(self.categories):
+            label = tk.Label(frame, text=f"{category} folder:", font=("Courier", 12), bg="#1A1A1D", fg="#CCCCCC", width=15, anchor='w')
+            label.grid(row=idx, column=0, padx=5, pady=5, sticky='w')
 
             entry = tk.Entry(frame, width=40, font=("Courier", 10), bg="#333333", fg="#CCCCCC", insertbackground="#CCCCCC")
-            entry.grid(row=0, column=1, padx=5)
+            entry.grid(row=idx, column=1, padx=5, pady=5)
             self.category_paths[category] = entry
 
             button = tk.Button(frame, text="Browse", command=lambda c=category: self.browse_folder(c), font=("Courier", 10), bg="#333333", fg="#66FF66", activebackground="#444444", activeforeground="#FFFFFF")
-            button.grid(row=0, column=2, padx=5)
+            button.grid(row=idx, column=2, padx=5, pady=5)
 
             if category == 'Others':
-                opt_label = tk.Label(frame, text="(optional)", font=("Courier", 12), bg="#1A1A1D", fg="#666666")
-                opt_label.grid(row=0, column=3, padx=5)
+                opt_label = tk.Label(frame, font=("Courier", 12), bg="#1A1A1D", fg="#666666")
+                opt_label.grid(row=idx, column=3, padx=5, pady=5, sticky='w')
 
         self.preview_button = tk.Button(self.root, text="Preview Files", command=self.preview_files, font=("Courier", 12), bg="#333333", fg="#66FF66", activebackground="#444444", activeforeground="#FFFFFF")
         self.preview_button.pack(pady=10)
@@ -52,18 +55,12 @@ class DesktopCleanerInator:
         self.preview_text = scrolledtext.ScrolledText(self.root, width=70, height=10, font=("Courier", 10), bg="#1A1A1D", fg="#CCCCCC", insertbackground="#CCCCCC")
         self.preview_text.pack(pady=10)
 
-        self.clean_button = tk.Button(self.root, text="Clean Desktop", command=self.clean_desktop, font=("Courier", 12, "bold"), bg="#333333", fg="#66FF66", activebackground="#444444", activeforeground="#FFFFFF")
-        self.clean_button.pack(pady=20)
 
         self.github_button = tk.Button(self.root, text="Visit My GitHub", command=self.open_github, font=("Courier", 12), bg="#333333", fg="#66FF66", activebackground="#444444", activeforeground="#FFFFFF")
         self.github_button.pack(pady=10)
 
         self.author_label = tk.Label(self.root, text="Made by João Pereira", font=("Courier", 10), bg="#1A1A1D", fg="#666666")
         self.author_label.pack(pady=10)
-
-    def open_github(self):
-        webbrowser.open('https://github.com/joao-per')
-
 
     def browse_folder(self, category):
         folder_selected = filedialog.askdirectory()
@@ -82,7 +79,6 @@ class DesktopCleanerInator:
             preview_text += "\n"
         self.preview_text.delete(1.0, tk.END)
         self.preview_text.insert(tk.END, preview_text)
-
 
     def clean_desktop(self):
         desktop_path, files = get_desktop_files()
@@ -121,9 +117,11 @@ class DesktopCleanerInator:
             pass
         return str(datetime.fromtimestamp(os.path.getmtime(filepath)).year)
 
+    def open_github(self):
+        webbrowser.open_new("https://github.com/joao-per")
+
 def get_desktop_files():
-    home_path = os.path.expanduser('~')
-    desktop_path = os.path.join(home_path, 'Desktop')
+    desktop_path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
     files = [f for f in os.listdir(desktop_path) if os.path.isfile(os.path.join(desktop_path, f))]
     return desktop_path, files
 
@@ -153,6 +151,5 @@ def categorize_files(files):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.configure(bg="#1A1A1D")
     app = DesktopCleanerInator(root)
     root.mainloop()
