@@ -16,9 +16,10 @@ class DesktopCleanerInator:
 	
 	def __init__(self, root):
 		self.root = root
-		self.root.title("Desktop Cleaner")
-		self.root.geometry("600x900")
+		self.root.title("Desktop Cleaner Inator")
+		self.root.geometry("600x700")
 		self.root.configure(bg="#1A1A1D")
+		self.root.iconbitmap("icon.ico")
 		self.create_widgets()
 
 	def save_settings(self):
@@ -68,17 +69,10 @@ class DesktopCleanerInator:
 
 		# Backup option
 		self.backup_var = tk.BooleanVar()
-		self.backup_var.set(True)
+		self.backup_var.set(False)
 
 		self.backup_check = tk.Checkbutton(frame, text="Create Backup", variable=self.backup_var, font=("Courier", 12), bg="#1A1A1D", fg="#CCCCCC", selectcolor="#1A1A1D", activebackground="#1A1A1D", activeforeground="#CCCCCC")
 		self.backup_check.grid(row=9, column=0, columnspan=3, padx=5, pady=5)
-
-		# Move folders option
-		self.move_folders_var = tk.BooleanVar()
-		self.move_folders_var.set(True)
-
-		self.move_folders_check = tk.Checkbutton(frame, text="Move Folders to a New Folder", variable=self.move_folders_var, font=("Courier", 12), bg="#1A1A1D", fg="#CCCCCC", selectcolor="#1A1A1D", activebackground="#1A1A1D", activeforeground="#CCCCCC")
-		self.move_folders_check.grid(row=10, column=0, columnspan=3, padx=5, pady=5)
 
 		# Exclusion list
 		exclusion_frame = tk.Frame(frame, bg="#1A1A1D")
@@ -161,13 +155,6 @@ class DesktopCleanerInator:
 		self.preview_text.delete(1.0, tk.END)
 		self.preview_text.insert(tk.END, preview_text)
 
-	def notify_user(self, message):
-		notification.notify(
-			title='Desktop Cleaner Inator',
-			message=message,
-			app_name='Desktop Cleaner',
-			timeout=10
-		)
 
 	def clean_desktop(self):
 		desktop_path, files = get_desktop_files()
@@ -175,16 +162,9 @@ class DesktopCleanerInator:
 			self.create_backup(desktop_path, files)
 		categorized_files = categorize_files(files)
 
-		if self.move_folders_var.get():
-			user_folder = os.path.join(desktop_path, os.path.basename(os.path.expanduser('~')))
-			if not os.path.exists(user_folder):
-				os.makedirs(user_folder)
-			self.move_folders(desktop_path, user_folder)
-
 		total_files = sum(len(files) for files in categorized_files.values())
 		if total_files == 0:
 			messagebox.showinfo("Success", "Desktop is already clean!")
-			self.notify_user("Desktop is already clean!")
 		else:
 			processed_files = 0
 
@@ -203,7 +183,6 @@ class DesktopCleanerInator:
 				self.root.update_idletasks()
 
 			messagebox.showinfo("Success", "Desktop cleaned up successfully!")
-			self.notify_user("Everything is cleaned!")
 			self.progress_bar['value'] = 0  # Reset progress bar
 
 		if self.clean_downloads_var.get():
@@ -225,10 +204,8 @@ class DesktopCleanerInator:
 					self.move_files(categorized_downloads_files.get(category, []), downloads_path, folder_path, category)
 
 				messagebox.showinfo("Success", "Downloads folder cleaned up successfully!")
-				self.notify_user("Downloads folder is clean!")
 			else:
 				messagebox.showinfo("Success", "Downloads folder is already clean!")
-				self.notify_user("Downloads folder is already clean!")
 
 	def create_backup(self, path, files):
 		backup_path = os.path.join(path, "Backup")
@@ -251,13 +228,6 @@ class DesktopCleanerInator:
 			shutil.move(src, dst)
 			self.open_folder(dst)
 			
-	def move_folders(self, path, user_folder):
-		current_dir = os.path.dirname(os.path.abspath(__file__))
-		user_folder_name = os.path.basename(user_folder)  # Get the name of the user's folder
-		for item in os.listdir(path):
-			item_path = os.path.join(path, item)
-			if os.path.isdir(item_path) and item_path != current_dir and item != user_folder_name:
-				shutil.move(item_path, os.path.join(user_folder, item))
 
 	def open_folder(self, path):
 		folder_path = os.path.dirname(path)
